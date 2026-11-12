@@ -6,6 +6,15 @@
   "bin": {
     "herdr-auto-title": "./bin/cli.js"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "AGENTS.md",
+    "SKILL.md",
+    "README.md",
+    "LICENSE",
+    "herdr-plugin.toml"
+  ],
   "scripts": {
     "test": "node --test tests/*.test.js",
     "status": "node ./bin/cli.js status",
