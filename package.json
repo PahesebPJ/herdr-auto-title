@@ -1,0 +1,41 @@
+{
+  "name": "herdr-auto-title",
+  "version": "0.1.0",
+  "description": "Automatic plain-text tab and pane title updater for Herdr TUI across AI coding agents with zero token overhead",
+  "main": "src/title.js",
+  "bin": {
+    "herdr-auto-title": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "status": "node ./bin/cli.js status",
+    "install-agents": "node ./bin/cli.js install",
+    "uninstall-agents": "node ./bin/cli.js uninstall"
+  },
+  "keywords": [
+    "herdr",
+    "tui",
+    "terminal",
+    "coding-agents",
+    "antigravity",
+    "claude-code",
+    "codex",
+    "opencode",
+    "auto-title",
+    "developer-tools"
+  ],
+  "author": "PahesebPJ",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PahesebPJ/herdr-auto-title.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PahesebPJ/herdr-auto-title/issues"
+  },
+  "homepage": "https://github.com/PahesebPJ/herdr-auto-title#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {}
+}

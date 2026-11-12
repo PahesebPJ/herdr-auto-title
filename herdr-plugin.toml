@@ -1,0 +1,21 @@
+id = "herdr-auto-title"
+name = "Herdr Auto Title"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Automatic plain-text tab and pane title updater for Herdr TUI across AI coding agents with zero token overhead"
+platforms = ["windows", "linux", "macos"]
+
+[[actions]]
+id = "status"
+title = "Show Agent Integration Status"
+contexts = ["workspace", "pane"]
+command = ["node", "bin/cli.js", "status"]
+
+[[actions]]
+id = "install-all"
+title = "Install Hooks for All Agents"
+contexts = ["workspace", "pane"]
+command = ["node", "bin/cli.js", "install"]
+
+[[startup]]
+command = ["node", "bin/cli.js", "install"]
