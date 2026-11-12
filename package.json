@@ -4,7 +4,7 @@
   "description": "Automatic plain-text tab and pane title updater for Herdr TUI across AI coding agents with zero token overhead",
   "main": "src/title.js",
   "bin": {
-    "herdr-auto-title": "./bin/cli.js"
+    "herdr-auto-title": "bin/cli.js"
   },
   "files": [
     "bin/",
@@ -37,7 +37,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PahesebPJ/herdr-auto-title.git"
+    "url": "git+https://github.com/PahesebPJ/herdr-auto-title.git"
   },
   "bugs": {
     "url": "https://github.com/PahesebPJ/herdr-auto-title/issues"
