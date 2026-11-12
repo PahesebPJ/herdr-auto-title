@@ -2,10 +2,19 @@
  * Universal hook runner for coding agents.
  * Reads hook payloads on stdin, extracts the user intent,
  * updates Herdr titles in plain text, and exits with `{}` (0 token injection).
+ *
+ * By default, anchors the title to the FIRST prompt of each session/conversation
+ * so follow-up turns ("yes", "continue", etc.) do not overwrite it.
+ * Set HERDR_AUTO_TITLE_MODE=latest to update on every prompt instead.
  */
 
 const { extractTitle } = require("./title");
 const { updateHerdrTitle } = require("./herdr");
+const {
+  resolveSessionKey,
+  getSessionTitle,
+  setSessionTitle
+} = require("./session-state");
 
 /**
  * Read all input from stdin with a safety timeout.
@@ -82,8 +91,23 @@ async function runHook(eventName = "PreInvocation") {
       }
     }
 
+    const mode = (process.env.HERDR_AUTO_TITLE_MODE || "first").toLowerCase();
     const event = (payload.hookEventName || eventName || "").toLowerCase();
-    const isDone = event.includes("stop") || event.includes("end");
+    const isStop = event.includes("stop") || event.includes("end");
+
+    // In default "first" mode, Stop/End events never overwrite the anchored session title
+    if (isStop && mode !== "latest") {
+      emitAndExit();
+      return;
+    }
+
+    const sessionKey = resolveSessionKey(payload);
+
+    // In default "first" mode, skip if this session already has an anchored title
+    if (mode !== "latest" && sessionKey && getSessionTitle(sessionKey)) {
+      emitAndExit();
+      return;
+    }
 
     // Extract prompt from platform-specific payload properties
     let prompt =
@@ -100,10 +124,13 @@ async function runHook(eventName = "PreInvocation") {
       prompt = prompt.content || prompt.text || "";
     }
 
-    if (prompt && typeof prompt === "string") {
-      const title = extractTitle(prompt, { done: isDone });
+    if (prompt && typeof prompt === "string" && prompt.trim()) {
+      const title = extractTitle(prompt, { done: isStop });
+      if (mode !== "latest" && sessionKey) {
+        setSessionTitle(sessionKey, title);
+      }
       await updateHerdrTitle(title);
-    } else if (isDone) {
+    } else if (isStop && mode === "latest") {
       await updateHerdrTitle("done");
     }
   } catch (_) {

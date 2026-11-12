@@ -12,7 +12,10 @@ const SLASH_COMMANDS_REGEX = /^\s*\/[a-zA-Z0-9_-]+\s+/;
 
 // Conversational introductory phrases in Spanish and English (politeness, fillers)
 const FILLER_PATTERNS = [
-  // Spanish fillers
+  // Spanish fillers & greetings
+  /^(?:hola\s*[,!.]?\s*)/i,
+  /^(?:oye\s*[,!.]?\s*)/i,
+  /^(?:actualmente\s*,?\s*)/i,
   /^(?:por\s+favor\s*,?\s*)/i,
   /^(?:ay[uú]dame\s+(?:a|con|en)\s+)/i,
   /^(?:ayuda\s+(?:a|con|en)\s+)/i,
@@ -25,7 +28,8 @@ const FILLER_PATTERNS = [
   /^(?:vamos\s+a\s+)/i,
   /^(?:me\s+gustar[ií]a\s+(?:que\s+)?)/i,
 
-  // English fillers
+  // English fillers & greetings
+  /^(?:(?:hi|hello|hey)\s*[,!.]?\s*)/i,
   /^(?:please\s*,?\s*)/i,
   /^(?:could\s+you\s+(?:please\s+)?)/i,
   /^(?:can\s+you\s+(?:please\s+)?)/i,
