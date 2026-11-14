@@ -15,6 +15,20 @@ function getCliExecutablePath() {
   return path.resolve(__dirname, "..", "..", "bin", "cli.js");
 }
 
+function isOwnCommand(cmd) {
+  return typeof cmd === "string" && cmd.includes("herdr-auto-title");
+}
+
+function isLegacyEntry(entry) {
+  return !!entry && !Array.isArray(entry.hooks) && isOwnCommand(entry.command);
+}
+
+function entryHasCommand(entry, predicate) {
+  if (!entry) return false;
+  if (predicate(entry.command)) return true;
+  return Array.isArray(entry.hooks) && entry.hooks.some((h) => h && predicate(h.command));
+}
+
 function isInstalled() {
   const claudeDir = getClaudeDir();
   const hookScript = path.join(claudeDir, "hooks", "herdr-auto-title.sh");
@@ -51,9 +65,15 @@ fi
   settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit || [];
 
   const commandStr = `node "${cliPath}" hook UserPromptSubmit`;
-  const exists = settings.hooks.UserPromptSubmit.some((h) => h.command === commandStr);
+  const entries = settings.hooks.UserPromptSubmit;
+  // Drop flat `{ command }` entries written by <=0.1.2; Claude Code rejects them.
+  const cleaned = entries.filter((entry) => !isLegacyEntry(entry));
+  const exists = cleaned.some((entry) => entryHasCommand(entry, (cmd) => cmd === commandStr));
   if (!exists) {
-    settings.hooks.UserPromptSubmit.push({ command: commandStr });
+    cleaned.push({ hooks: [{ type: "command", command: commandStr }] });
+  }
+  if (!exists || cleaned.length !== entries.length) {
+    settings.hooks.UserPromptSubmit = cleaned;
     try {
       fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
     } catch (_) {}
@@ -78,7 +98,7 @@ function uninstall() {
       const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
       if (settings.hooks && Array.isArray(settings.hooks.UserPromptSubmit)) {
         settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit.filter(
-          (h) => !h.command || !h.command.includes("herdr-auto-title")
+          (entry) => !entryHasCommand(entry, isOwnCommand)
         );
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
       }

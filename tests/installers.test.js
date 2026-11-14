@@ -67,3 +67,48 @@ test("installers - mock install and uninstall for claude", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test("installers - claude writes valid nested hook format and migrates legacy entries", () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "herdr-test-claude-fmt-"));
+  const origClaude = process.env.CLAUDE_CONFIG_DIR;
+  const settingsPath = path.join(tmpDir, "settings.json");
+  const readSettings = () => JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+  const foreignEntry = { hooks: [{ type: "command", command: "echo other-tool" }] };
+
+  try {
+    process.env.CLAUDE_CONFIG_DIR = tmpDir;
+    fs.writeFileSync(
+      settingsPath,
+      JSON.stringify({
+        theme: "dark",
+        hooks: {
+          UserPromptSubmit: [
+            { command: 'node "/old/path/herdr-auto-title/bin/cli.js" hook UserPromptSubmit' },
+            foreignEntry
+          ]
+        }
+      })
+    );
+
+    installTarget("claude");
+    installTarget("claude");
+
+    const settings = readSettings();
+    assert.equal(settings.theme, "dark");
+    const entries = settings.hooks.UserPromptSubmit;
+    assert.equal(entries.length, 2);
+    assert.deepEqual(entries[0], foreignEntry);
+    for (const entry of entries) {
+      assert.ok(Array.isArray(entry.hooks), "every entry must have a hooks array");
+      assert.equal(entry.command, undefined);
+      for (const h of entry.hooks) assert.equal(h.type, "command");
+    }
+    assert.match(entries[1].hooks[0].command, /herdr-auto-title.*hook UserPromptSubmit$/);
+
+    uninstallTarget("claude");
+    assert.deepEqual(readSettings().hooks.UserPromptSubmit, [foreignEntry]);
+  } finally {
+    process.env.CLAUDE_CONFIG_DIR = origClaude;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
