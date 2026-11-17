@@ -1,6 +1,6 @@
 {
   "name": "herdr-auto-title",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Automatic plain-text tab and pane title updater for Herdr TUI across AI coding agents with zero token overhead",
   "main": "src/title.js",
   "bin": {
